@@ -30,12 +30,14 @@
 #include <config.h>
 
 #include <list>
+#include <utility>
 #include <deque>
 #include <map>
 #include <set>
 #include <string>
 #include <vector>
 #include <memory>
+#include <array>
 #include "MSGlobals.h"
 #include "MSBaseVehicle.h"
 #include "MSNet.h"
@@ -1238,6 +1240,41 @@ public:
 
     /// @brief get bounding polygon
     PositionVector getBoundingPoly(double offset = 0) const;
+
+
+    public:
+
+        std::pair<double,double> pastSpeeds[2] = {{0,0},{0,0}};
+
+        double yawRate;
+        double rollAngle;
+        
+        void initPastSpeed(const double speed,double t){
+            std::pair<double,double> temp = {speed,t};
+            auto first = pastSpeeds[0];
+            pastSpeeds[0] = temp;
+            pastSpeeds[1] = first;
+            
+        };
+
+        void calculateYawRate (const MSVehicle* veh);
+        void calculateRollAngle (const MSVehicle* veh);
+
+        void setYawRate (double yaw){
+            yawRate = yaw;
+        };
+
+        void setRollAngle(double roll){
+            rollAngle = roll;
+        };
+
+        double getYawRate(){
+            return yawRate;
+        };
+
+        double getRollAngle()const{
+            return rollAngle;
+        };
 
     /** @enum ManoeuvreType
      *  @brief  flag identifying which, if any, manoeuvre is in progress

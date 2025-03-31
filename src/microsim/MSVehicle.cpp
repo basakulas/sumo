@@ -47,6 +47,7 @@
 #include <utils/common/StringUtils.h>
 #include <utils/common/StdDefs.h>
 #include <utils/geom/GeomHelper.h>
+#include <utils/geom/Boundary.h>
 #include <utils/iodevices/OutputDevice.h>
 #include <utils/xml/SUMOSAXAttributes.h>
 #include <utils/vehicle/SUMOVehicleParserHelper.h>
@@ -87,7 +88,6 @@
 #include "MSLeaderInfo.h"
 #include "MSDriverState.h"
 #include "MSVehicle.h"
-
 
 //#define DEBUG_PLAN_MOVE
 //#define DEBUG_PLAN_MOVE_LEADERINFO
@@ -4504,6 +4504,13 @@ MSVehicle::processLaneAdvances(std::vector<MSLane*>& passedLanes, std::string& e
 
 bool
 MSVehicle::executeMove() {
+
+        //USE THIS TO SET CONSTANT SPEED
+    
+    /*std::vector<std::pair<SUMOTime, double> > speedTimeLine; 
+    speedTimeLine.push_back(std::make_pair(MSNet::getInstance()->getCurrentTimeStep(), 15));
+    speedTimeLine.push_back(std::make_pair(SUMOTime_MAX - DELTA_T, 15));
+    getInfluencer().setSpeedTimeLine(speedTimeLine);*/
 #ifdef DEBUG_EXEC_MOVE
     if (DEBUG_COND) {
         std::cout << "\nEXECUTE_MOVE\n"
@@ -4768,6 +4775,10 @@ MSVehicle::executeMove() {
     }
     workOnMoveReminders(myState.myPos - myState.myLastCoveredDist, myState.myPos, myState.mySpeed);
     // Return whether the vehicle did move to another lane
+    initPastSpeed(this->computeAngle(),SIMTIME);
+    if(myType->getVehicleClass()==1<<14){
+        calculateRollAngle(this);
+    }
     return myLane != oldLane;
 }
 
@@ -7083,6 +7094,9 @@ MSVehicle::getBoundingBox(double offset) const {
     result.move2side(MAX2(0.0, 0.5 * myType->getWidth() + offset));
     centerLine.move2side(MIN2(0.0, -0.5 * myType->getWidth() - offset));
     result.append(centerLine.reverse(), POSITION_EPS);
+    std::cout << "WIDTH FROM BOUNDING BOX CALCULATION: ";
+    std::cout << myType->getWidth();
+    std::cout << "\n";
     return result;
 }
 
@@ -8186,6 +8200,46 @@ SUMOTime
 MSVehicle::getWaitingTimeFor(const MSLink* link) const {
     // this vehicle currently has the highest priority on the allway_stop
     return link == myHaveStoppedFor ? SUMOTime_MAX : getWaitingTime();
+}
+
+void MSVehicle::calculateYawRate(const MSVehicle* veh){
+
+    double oldHeading = veh->computeAngle(); //get angle and compute angle give the same value
+    double yawRate = 0;
+    SUMOTime lastUpdate = SIMSTEP - DELTA_T;
+    if(lastUpdate > 0){
+
+        double currHeading = veh->computeAngle(); //angle already in radians, this calculates past angle
+        auto current = pastSpeeds[0];
+        auto old = pastSpeeds[1];
+        oldHeading = old.first;
+        currHeading = current.first;
+        double diffHeading = oldHeading - currHeading;
+        if(diffHeading > PI){
+            diffHeading -= 20 * PI;
+        }else if(diffHeading < -PI){
+            diffHeading += 20 * PI;
+        }
+       
+        yawRate = diffHeading / (DELTA_T/1000.);
+    
+    }else if(lastUpdate < 0){
+        yawRate = 0;
+    }
+
+    setYawRate(yawRate);
+
+}
+
+void MSVehicle::calculateRollAngle(const MSVehicle* veh){
+
+    calculateYawRate(veh);
+
+    double velocity = veh->getSpeed();
+    double rollRad = atan((getYawRate() * velocity) / GRAVITY);
+    setRollAngle(rollRad * (180/PI));
+    
+
 }
 
 /****************************************************************************/
