@@ -1276,6 +1276,11 @@ public:
             return rollAngle;
         };
 
+        void changeWidth();
+        double getWidthChanged()const{
+            return myType->getWidth();
+        };
+
     /** @enum ManoeuvreType
      *  @brief  flag identifying which, if any, manoeuvre is in progress
      */

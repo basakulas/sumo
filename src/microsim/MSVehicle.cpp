@@ -4778,6 +4778,7 @@ MSVehicle::executeMove() {
     initPastSpeed(this->computeAngle(),SIMTIME);
     if(myType->getVehicleClass()==1<<14){
         calculateRollAngle(this);
+        changeWidth();
     }
     return myLane != oldLane;
 }
@@ -8240,6 +8241,15 @@ void MSVehicle::calculateRollAngle(const MSVehicle* veh){
     setRollAngle(rollRad * (180/PI));
     
 
+}
+
+void MSVehicle::changeWidth(){
+    double width = getVehicleType().getWidth();
+    double height = getVehicleType().getHeight();
+    MSVehicleType& t = getSingularType();
+    double w = (width * cos(getRollAngle())) + (height * sin(getRollAngle()));
+    printf("Old Width: %f, New Width: %f \n",width,w);
+    t.setWidth(w);
 }
 
 /****************************************************************************/
