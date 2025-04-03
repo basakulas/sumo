@@ -1245,6 +1245,7 @@ public:
     public:
 
         std::pair<double,double> pastSpeeds[2] = {{0,0},{0,0}};
+        std::vector<std::pair<float,PositionVector>> boundingBoxValues;
 
         double yawRate;
         double rollAngle;
@@ -1280,6 +1281,9 @@ public:
         double getWidthChanged()const{
             return myType->getWidth();
         };
+        std::vector<std::pair<float,PositionVector>> getBoundingBoxValues() const {
+            return boundingBoxValues;
+        }
 
     /** @enum ManoeuvreType
      *  @brief  flag identifying which, if any, manoeuvre is in progress

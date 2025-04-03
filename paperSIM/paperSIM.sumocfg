@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on 2025-04-03 16:15:19 by Eclipse SUMO sumo Version 876f0cb3751
+-->
+
+<sumoConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
+
+    <input>
+        <net-file value="AudiKreis.net.xml"/>
+        <route-files value="paperSIM.rou.xml"/>
+    </input>
+
+</sumoConfiguration>

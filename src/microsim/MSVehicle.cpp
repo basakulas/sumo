@@ -4779,6 +4779,8 @@ MSVehicle::executeMove() {
     if(myType->getVehicleClass()==1<<14){
         calculateRollAngle(this);
         changeWidth();
+        std::pair<float,PositionVector> values = {SIMTIME,getBoundingBox()};
+        boundingBoxValues.push_back(values);
     }
     return myLane != oldLane;
 }
@@ -8248,7 +8250,7 @@ void MSVehicle::changeWidth(){
     double height = getVehicleType().getHeight();
     MSVehicleType& t = getSingularType();
     double w = (width * cos(getRollAngle())) + (height * sin(getRollAngle()));
-    printf("Old Width: %f, New Width: %f \n",width,w);
+    //printf("Old Width: %f, New Width: %f \n",width,w);
     t.setWidth(w);
 }
 
