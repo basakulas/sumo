@@ -1283,7 +1283,7 @@ public:
         };
         std::vector<std::pair<float,PositionVector>> getBoundingBoxValues() const {
             return boundingBoxValues;
-        }
+        };
 
     /** @enum ManoeuvreType
      *  @brief  flag identifying which, if any, manoeuvre is in progress

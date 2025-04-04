@@ -237,7 +237,7 @@ GUIVehicle::getTypeParameterWindow(GUIMainWindow& app, GUISUMOAbstractView&) {
     GUIParameterTableWindow* ret = new GUIParameterTableWindow(app, *this, "vType:" + myType->getID());
     ret->mkItem(TL("length [m]"), false, myType->getLength());
     if(this->getVehicleType().getVehicleClass() == 1<<14){
-        ret->mkItem(TL("roll angle [degree]"), true,
+        ret->mkItem(TL("width [m]"), true,
                 new FunctionBinding<GUIVehicle, double>(this, &MSVehicle::getWidthChanged));
     }
     else{

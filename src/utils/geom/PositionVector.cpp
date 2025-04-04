@@ -646,7 +646,7 @@ std::ostream&
 operator<<(std::ostream& os, const PositionVector& geom) {
     for (PositionVector::const_iterator i = geom.begin(); i != geom.end(); i++) {
         if (i != geom.begin()) {
-            os << " ";
+            os << ",";
         }
         os << (*i);
     }

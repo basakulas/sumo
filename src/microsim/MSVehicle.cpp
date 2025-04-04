@@ -4777,11 +4777,11 @@ MSVehicle::executeMove() {
     // Return whether the vehicle did move to another lane
     initPastSpeed(this->computeAngle(),SIMTIME);
     if(myType->getVehicleClass()==1<<14){
-        calculateRollAngle(this);
-        changeWidth();
-        std::pair<float,PositionVector> values = {SIMTIME,getBoundingBox()};
-        boundingBoxValues.push_back(values);
+       calculateRollAngle(this);
+       changeWidth();
     }
+    std::pair<float,PositionVector> values = {SIMTIME,getBoundingBox()};
+    boundingBoxValues.push_back(values);
     return myLane != oldLane;
 }
 
@@ -7097,9 +7097,6 @@ MSVehicle::getBoundingBox(double offset) const {
     result.move2side(MAX2(0.0, 0.5 * myType->getWidth() + offset));
     centerLine.move2side(MIN2(0.0, -0.5 * myType->getWidth() - offset));
     result.append(centerLine.reverse(), POSITION_EPS);
-    std::cout << "WIDTH FROM BOUNDING BOX CALCULATION: ";
-    std::cout << myType->getWidth();
-    std::cout << "\n";
     return result;
 }
 
@@ -8250,8 +8247,8 @@ void MSVehicle::changeWidth(){
     double height = getVehicleType().getHeight();
     MSVehicleType& t = getSingularType();
     double w = (width * cos(getRollAngle())) + (height * sin(getRollAngle()));
-    //printf("Old Width: %f, New Width: %f \n",width,w);
     t.setWidth(w);
 }
+
 
 /****************************************************************************/

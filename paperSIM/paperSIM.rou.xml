@@ -1,16 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- generated on 2025-04-03 16:13:49 by Eclipse SUMO netedit Version 876f0cb3751
+<!-- generated on 2025-04-04 09:30:41 by Eclipse SUMO netedit Version 876f0cb3751
 -->
 
 <routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
     <!-- VTypes -->
-    <vType id="DEFAULT_VEHTYPE" vClass="motorcycle" color="red"/>
     <vType id="ptw" vClass="motorcycle" color="red"/>
-    <vType id="t_0" vClass="motorcycle" color="red"/>
     <vType id="t_1"/>
     <!-- Vehicles, persons and containers (sorted by depart) -->
-    <trip id="t_0" type="t_1" depart="0.00" departLane="0" color="yellow" from="449057052" to="-988092051" via="449057052 379795373 379795371 378946906 128361098 -746700171"/>
-    <trip id="t_1" type="t_1" depart="0.00" departLane="2" color="magenta" from="449057052" to="-988092051" via="449057052 378946906 128361098 -746700171"/>
-    <trip id="t_2" type="ptw" depart="0.00" color="red" from="449057052" to="-988092051" via="378946906"/>
+    <trip id="t_0" type="ptw" depart="0.00" departLane="1" color="red" from="449057052" to="-988092054" via="-35926528"/>
+    <trip id="t_1" type="t_1" depart="0.00" departLane="2" color="yellow" from="449057052" to="109483352#0" via="449057059 449057052"/>
 </routes>
