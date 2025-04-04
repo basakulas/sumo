@@ -152,6 +152,7 @@ public:
     virtual void deleteVehicle(SUMOVehicle* v, bool discard = false, bool wasKept = false);
 
     void exportBoundingBox(std::vector<std::pair<float,PositionVector>>& values,const MSVehicle* v);
+    void exportOldBoundingBox(std::vector<std::pair<float,PositionVector>>& values,const MSVehicle* v);
     /** @brief when a vehicle is kept after arrival, schedule later deletion **/
     void deleteKeptVehicle(SUMOVehicle* veh);
 

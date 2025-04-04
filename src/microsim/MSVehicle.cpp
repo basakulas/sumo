@@ -4777,8 +4777,10 @@ MSVehicle::executeMove() {
     // Return whether the vehicle did move to another lane
     initPastSpeed(this->computeAngle(),SIMTIME);
     if(myType->getVehicleClass()==1<<14){
-       calculateRollAngle(this);
-       changeWidth();
+      calculateRollAngle(this);
+      std::pair<float,PositionVector> values = {SIMTIME,getBoundingBox()};
+        oldBoundingBoxValues.push_back(values);
+     changeWidth();
     }
     std::pair<float,PositionVector> values = {SIMTIME,getBoundingBox()};
     boundingBoxValues.push_back(values);
@@ -8221,6 +8223,7 @@ void MSVehicle::calculateYawRate(const MSVehicle* veh){
             diffHeading += 20 * PI;
         }
        
+        
         yawRate = diffHeading / (DELTA_T/1000.);
     
     }else if(lastUpdate < 0){

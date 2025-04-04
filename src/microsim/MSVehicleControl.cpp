@@ -348,10 +348,11 @@ MSVehicleControl::getVehicle(const std::string& id) const {
 void
 MSVehicleControl::deleteVehicle(SUMOVehicle* veh, bool discard, bool wasKept) {
     const MSVehicle* msVeh = dynamic_cast<const MSVehicle*>(veh);
-    /*if(msVeh->getVehicleType().getVehicleClass() == 1<<14){
-        auto temp = msVeh->getBoundingBoxValues();
-        exportBoundingBox(temp,msVeh);
-    }*/
+    if(msVeh->getVehicleType().getVehicleClass() == 1<<14){
+        auto temp = msVeh->getOldBoundingBoxValues();
+        exportOldBoundingBox(temp,msVeh);
+    }
+    //if(msVeh->getID() == "veh_id"){};
     auto temp = msVeh->getBoundingBoxValues();
     exportBoundingBox(temp,msVeh);
     if (!wasKept) {
@@ -375,6 +376,23 @@ MSVehicleControl::exportBoundingBox(std::vector<std::pair<float,PositionVector>>
 
 
     std::string path = "/home/ulas/Desktop/boundingbox_" + v->getID() + ".csv";
+    std::ofstream file(path);
+    if(!file.is_open()){
+        std::cerr << "Could not open file" << path << std::endl;
+    }
+
+    file << "SIMTIME, TOP_LEFT_X, TOP_LEFT_Y, BOTTOM_LEFT_X, BOTTOM_LEFT_Y, BOTTOM_RIGHT_X, BOTTOM_RIGHT_Y, TOP_RIGHT_X, TOP_RIGHT_Y \n";
+    for(const auto& entry: values){
+        file << entry.first << "," << entry.second << "\n";
+    }
+    file.close();
+}
+
+void
+MSVehicleControl::exportOldBoundingBox(std::vector<std::pair<float,PositionVector>>& values, const MSVehicle* v){
+
+
+    std::string path = "/home/ulas/Desktop/boundingboxOLDPTW_" + v->getID() + ".csv";
     std::ofstream file(path);
     if(!file.is_open()){
         std::cerr << "Could not open file" << path << std::endl;

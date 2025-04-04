@@ -28,8 +28,8 @@
 -->
 
 <routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
-<vType id="t_0" vClass="motorcycle" color="yellow"/>
-    <vehicle id="1" type="t_0" depart="0.50">
+<vType id="t_0" vClass="motorcycle" color="red"/>
+    <vehicle id="1" depart="0.50">
         <route edges="109483356#1 746700169 128361099 379795373 379795369 449057060 35926529 449057056 378946908 128361091 379795371 378946906 128361098 -746700171"/>
     </vehicle>
     <vehicle id="3" depart="1.50">
@@ -98,7 +98,7 @@
     <vehicle id="51" depart="25.50">
         <route edges="128361093#1 449057060 35926529 449057056 378946908 128361091 379795371 378946906 449057059 449057052 378946907 379795373 128361094#0"/>
     </vehicle>
-    <vehicle id="52" depart="26.00">
+    <vehicle id="52" type="t_0"  depart="26.00">
         <route edges="379795373 379795369 449057060 35926529 449057056 378946908 128361091 379795371 378946906 449057059 449057052 378946907"/>
     </vehicle>
     <vehicle id="55" depart="27.50">

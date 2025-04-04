@@ -1246,6 +1246,7 @@ public:
 
         std::pair<double,double> pastSpeeds[2] = {{0,0},{0,0}};
         std::vector<std::pair<float,PositionVector>> boundingBoxValues;
+        std::vector<std::pair<float,PositionVector>> oldBoundingBoxValues;
 
         double yawRate;
         double rollAngle;
@@ -1283,6 +1284,9 @@ public:
         };
         std::vector<std::pair<float,PositionVector>> getBoundingBoxValues() const {
             return boundingBoxValues;
+        };
+        std::vector<std::pair<float,PositionVector>> getOldBoundingBoxValues() const {
+            return oldBoundingBoxValues;
         };
 
     /** @enum ManoeuvreType
