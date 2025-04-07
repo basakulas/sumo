@@ -189,7 +189,7 @@ GUIVehicle::getParameterWindow(GUIMainWindow& app,
     ret->mkItem(TL("parking badges"), false, joinToString(getParkingBadges(), " "));
     if(this->getVehicleType().getVehicleClass() == 1<<14){
         ret->mkItem(TL("roll angle [degree]"), true,
-                new FunctionBinding<GUIVehicle, double>(this, &MSVehicle::getRollAngleDeg));
+                new FunctionBinding<GUIVehicle, double>(this, &MSVehicle::getRollAngle));
     }
     // close building
     if (MSGlobals::gLateralResolution > 0) {

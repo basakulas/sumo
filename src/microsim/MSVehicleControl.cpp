@@ -374,7 +374,7 @@ void
 MSVehicleControl::exportBoundingBox(std::vector<std::pair<float,PositionVector>>& values, const MSVehicle* v){
 
 
-    std::string path = "/home/ulas/Desktop/boundingbox_" + v->getID() + ".csv";
+    /*std::string path = "/home/ulas/Desktop/boundingbox_" + v->getID() + ".csv";
     std::ofstream file(path);
     if(!file.is_open()){
         std::cerr << "Could not open file" << path << std::endl;
@@ -384,7 +384,52 @@ MSVehicleControl::exportBoundingBox(std::vector<std::pair<float,PositionVector>>
     for(const auto& entry: values){
         file << entry.first << "," << entry.second << "\n";
     }
+
+    file.close();*/
+
+    const std::vector<std::pair<double,double>> angles = v->getRollAngles();
+
+    std::string path = "/home/ulas/Desktop/rollangle" + v->getID() + ".csv";
+    std::ofstream file(path);
+    if(!file.is_open()){
+        std::cerr << "Could not open file" << path << std::endl;
+    }
+
+    file << "TIME,ROLL_ANGLE";
+
+    for(const auto& entry: angles){
+        file << entry.first << "," << entry.second;
+    }
+
     file.close();
+
+
+    std::string path = "/home/ulas/Desktop/boundingboxdata" + v->getID() + ".csv";
+    std::ofstream file(path);
+    if(!file.is_open()){
+        std::cerr << "Could not open file" << path << std::endl;
+    }
+    file << "TIME,DISTANCE,AREA";
+    for(const auto& entry: values){
+        PositionVector temp = entry.second;
+        Position topLeft = temp.front();
+        Position topRight = temp.back();
+
+            double leftX = topLeft.x();
+            double rightX = topRight.x();
+            double leftY = topLeft.y();
+            double rightY = topRight.y();
+
+            double xdiff = (leftX - rightX) * (leftX - rightX);
+            double ydiff = (leftY - rightY) * (leftY - rightY) ;
+            double distance = sqrt(xdiff+ydiff);
+
+            double area = temp.area();
+            file << entry.first << "," << distance <<","<<area;
+    }
+    file.close();
+
+   
 }
 
 void
