@@ -4776,6 +4776,7 @@ MSVehicle::executeMove() {
     workOnMoveReminders(myState.myPos - myState.myLastCoveredDist, myState.myPos, myState.mySpeed);
     // Return whether the vehicle did move to another lane
     initPastSpeed(this->computeAngle(),SIMTIME);
+
     if(myType->getVehicleClass()==1<<14){
       calculateRollAngle(this);
       std::pair<float,PositionVector> values = {SIMTIME,getBoundingBox()};
@@ -7105,23 +7106,21 @@ MSVehicle::getBoundingBox(double offset) const {
     double height = myType->getHeight();
     double width = myType->getWidth();
 
-    if(myType->getVehicleClass() == 1<<14){
-        if(roll > 0){
-            result.move2side(MAX2(0.0, (height * sin(roll) + width * cos(roll)) + offset )); //to the left
+    if((myType->getVehicleClass() == 1<<14) && (roll!=0)){
+        if(roll < 0){
+            result.move2side(-(height * sin(roll) + width * cos(roll)) + offset ); //to the left
+            double updatedwidth = - height * sin(roll) + width * cos(roll);
+            printf("TIME %f THE WIDTH %f",SIMTIME, updatedwidth);
             //centerLine.move2side(MIN2(0.0, -0.5 * myType->getWidth()) - offset); // to the right
             result.append(centerLine.reverse(), POSITION_EPS);
 
         }
-        else if(roll < 0){
+        else if(roll > 0){
             //result.move2side(MAX2(0.0, 0.5 * myType->getWidth() + offset)); //to the left
-            centerLine.move2side(MIN2(0.0, (height * sin(roll) + width * cos(roll)) - offset)); // to the right
+            centerLine.move2side((height * sin(roll) + width * cos(roll)) - offset); // to the right
             result.append(centerLine.reverse(), POSITION_EPS);
-    
-        }
-        else if(roll == 0){
-            result.move2side(MAX2(0.0, 0.5 * myType->getWidth() + offset)); //to the left
-            centerLine.move2side(MIN2(0.0, -0.5 * myType->getWidth() - offset)); // to the right
-            result.append(centerLine.reverse(), POSITION_EPS);
+            double updatedwidth = height * sin(roll) + width * cos(roll);
+            printf("TIME %f THE WIDTH %f", SIMTIME, updatedwidth);
     
         }
 

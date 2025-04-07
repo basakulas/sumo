@@ -20,7 +20,7 @@ def run_simulation():
         #40km/h = 11.11 m/s
         #45km/h = 12.5 m/s
         #50km/h = 13.89 m/s
-        
+    
         setSpeed("t_0") #PTW
         setSpeed("t_1") #VEH
        
@@ -28,15 +28,16 @@ def run_simulation():
 
    
 def setSpeed(veh_id):
-    
     if veh_id in traci.vehicle.getIDList():
+       position3D = traci.vehicle.getPosition3D(veh_id)
+       print(f"3D position of '{veh_id}': x={position3D[0]:.2f}, y={position3D[1]:.2f}, z={position3D[2]:.2f}")
        traci.vehicle.setSpeedMode(veh_id,96)
        traci.vehicle.setSpeed(veh_id,13.89)
     	   
    
 
 if __name__ == "__main__":
-    sumo_config_path = "/home/ulas/sumofork/sumo/paperSIM/paperSIM.sumocfg"  # Update with your actual file path
+    sumo_config_path = "/home/ambica/sumo/paperSIM/paperSIM.sumocfg"  # Update with your actual file path
     start_sumo_gui(sumo_config_path)  # Start SUMO-GUI
     try:
         run_simulation()  # Run the simulation
