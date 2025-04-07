@@ -374,42 +374,42 @@ void
 MSVehicleControl::exportBoundingBox(std::vector<std::pair<float,PositionVector>>& values, const MSVehicle* v){
 
 
-    /*std::string path = "/home/ulas/Desktop/boundingbox_" + v->getID() + ".csv";
-    std::ofstream file(path);
-    if(!file.is_open()){
+    std::string path = "/home/ambica/Desktop/boundingbox_" + v->getID() + ".csv";
+    std::ofstream ffile(path);
+    if(!ffile.is_open()){
         std::cerr << "Could not open file" << path << std::endl;
     }
 
-    file << "SIMTIME, TOP_LEFT_X, TOP_LEFT_Y, BOTTOM_LEFT_X, BOTTOM_LEFT_Y, BOTTOM_RIGHT_X, BOTTOM_RIGHT_Y, TOP_RIGHT_X, TOP_RIGHT_Y \n";
+    ffile << "SIMTIME, TOP_LEFT_X, TOP_LEFT_Y, BOTTOM_LEFT_X, BOTTOM_LEFT_Y, BOTTOM_RIGHT_X, BOTTOM_RIGHT_Y, TOP_RIGHT_X, TOP_RIGHT_Y \n";
     for(const auto& entry: values){
-        file << entry.first << "," << entry.second << "\n";
+        ffile << entry.first << "," << entry.second << "\n";
     }
 
-    file.close();*/
+    ffile.close();
 
     const std::vector<std::pair<double,double>> angles = v->getRollAngles();
 
-    std::string path = "/home/ulas/Desktop/rollangle" + v->getID() + ".csv";
+     path = "/home/ambica/Desktop/rollangle" + v->getID() + ".csv";
     std::ofstream file(path);
     if(!file.is_open()){
         std::cerr << "Could not open file" << path << std::endl;
     }
 
-    file << "TIME,ROLL_ANGLE";
+    file << "TIME,ROLL_ANGLE"<<"\n";
 
     for(const auto& entry: angles){
-        file << entry.first << "," << entry.second;
+        file << entry.first << "," << entry.second << "\n" ;
     }
 
     file.close();
 
 
-    std::string path = "/home/ulas/Desktop/boundingboxdata" + v->getID() + ".csv";
-    std::ofstream file(path);
-    if(!file.is_open()){
+    path = "/home/ambica/Desktop/boundingboxdata" + v->getID() + ".csv";
+    std::ofstream exfile(path);
+    if(!exfile.is_open()){
         std::cerr << "Could not open file" << path << std::endl;
     }
-    file << "TIME,DISTANCE,AREA";
+    exfile << "TIME,DISTANCE,AREA" << "\n";
     for(const auto& entry: values){
         PositionVector temp = entry.second;
         Position topLeft = temp.front();
@@ -425,9 +425,9 @@ MSVehicleControl::exportBoundingBox(std::vector<std::pair<float,PositionVector>>
             double distance = sqrt(xdiff+ydiff);
 
             double area = temp.area();
-            file << entry.first << "," << distance <<","<<area;
+            exfile << entry.first << "," << distance <<","<<area <<"\n";
     }
-    file.close();
+    exfile.close();
 
    
 }
