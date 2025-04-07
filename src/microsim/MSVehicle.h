@@ -1278,6 +1278,10 @@ public:
             return rollAngle;
         };
 
+        double getRollAngleDeg() const{
+            return (rollAngle * (180/PI));
+        }
+
         void changeWidth();
         double getWidthChanged()const{
             return myType->getWidth();

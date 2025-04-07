@@ -4779,12 +4779,15 @@ MSVehicle::executeMove() {
     if(myType->getVehicleClass()==1<<14){
       calculateRollAngle(this);
       std::pair<float,PositionVector> values = {SIMTIME,getBoundingBox()};
-      oldBoundingBoxValues.push_back(values);
-        std::pair<float,PositionVector> modifiedvalues = {SIMTIME,calculateMotorcycleBoundingBox()};
-        boundingBoxValues.push_back(modifiedvalues);
+      boundingBoxValues.push_back(values);
+        //std::pair<float,PositionVector> modifiedvalues = {SIMTIME,calculateMotorcycleBoundingBox()};
+        //boundingBoxValues.push_back(modifiedvalues);
     }
-    else{std::pair<float,PositionVector> values = {SIMTIME,getBoundingBox()};
-    boundingBoxValues.push_back(values);}
+    else{
+        std::pair<float,PositionVector> values = {SIMTIME,getBoundingBox()};
+        boundingBoxValues.push_back(values);
+    }
+
     return myLane != oldLane;
 }
 
@@ -7097,9 +7100,36 @@ MSVehicle::getBoundingBox(double offset) const {
         centerLine.extrapolate2D(offset);
     }
     PositionVector result = centerLine;
-    result.move2side(MAX2(0.0, 0.5 * myType->getWidth() + offset));
-    centerLine.move2side(MIN2(0.0, -0.5 * myType->getWidth() - offset));
-    result.append(centerLine.reverse(), POSITION_EPS);
+
+    double roll = getRollAngle();
+    double height = myType->getHeight();
+    double width = myType->getWidth();
+
+    if(myType->getVehicleClass() == 1<<14){
+        if(roll > 0){
+            result.move2side(MAX2(0.0, (height * sin(roll) + width * cos(roll)) + offset )); //to the left
+            //centerLine.move2side(MIN2(0.0, -0.5 * myType->getWidth()) - offset); // to the right
+            result.append(centerLine.reverse(), POSITION_EPS);
+
+        }
+        else if(roll < 0){
+            //result.move2side(MAX2(0.0, 0.5 * myType->getWidth() + offset)); //to the left
+            centerLine.move2side(MIN2(0.0, (height * sin(roll) + width * cos(roll)) - offset)); // to the right
+            result.append(centerLine.reverse(), POSITION_EPS);
+    
+        }
+        else if(roll == 0){
+            result.move2side(MAX2(0.0, 0.5 * myType->getWidth() + offset)); //to the left
+            centerLine.move2side(MIN2(0.0, -0.5 * myType->getWidth() - offset)); // to the right
+            result.append(centerLine.reverse(), POSITION_EPS);
+    
+        }
+
+    }
+    
+    else{result.move2side(MAX2(0.0, 0.5 * myType->getWidth() + offset)); //to the left
+    centerLine.move2side(MIN2(0.0, -0.5 * myType->getWidth() - offset)); // to the right
+    result.append(centerLine.reverse(), POSITION_EPS);}
     return result;
 }
 

@@ -348,10 +348,10 @@ MSVehicleControl::getVehicle(const std::string& id) const {
 void
 MSVehicleControl::deleteVehicle(SUMOVehicle* veh, bool discard, bool wasKept) {
     const MSVehicle* msVeh = dynamic_cast<const MSVehicle*>(veh);
-    if(msVeh->getVehicleType().getVehicleClass() == 1<<14){
-        auto temp = msVeh->getOldBoundingBoxValues();
-        exportOldBoundingBox(temp,msVeh);
-    }
+    //if(msVeh->getVehicleType().getVehicleClass() == 1<<14){
+        //auto temp = msVeh->getOldBoundingBoxValues();
+      //  exportOldBoundingBox(temp,msVeh);
+   // }
     auto temp = msVeh->getBoundingBoxValues();
     exportBoundingBox(temp,msVeh);
     if (!wasKept) {
