@@ -1266,6 +1266,31 @@ public:
             yawRate = yaw;
         };
 
+        //std::vector<std::pair<double,double>> distances;
+
+        /*void setDistance(double t,double d){
+            std::pair<double,double> temp = {t,d};
+            distances.push_back(temp);
+        }
+
+        std::vector<std::pair<double,double>> getDistances(){
+            return distances;
+        }*/
+
+        std::vector<std::pair<double,double>> rollangles;
+
+        void setRollAngles(double t,double a){
+            std::pair<double,double> temp = {t,a};
+            rollangles.push_back(temp);
+        }
+
+        std::vector<std::pair<double,double>> getRollAngles() const {
+            return rollangles;
+        }
+
+
+        
+
         void setRollAngle(double roll){
             rollAngle = roll;
         };
@@ -1277,10 +1302,6 @@ public:
         double getRollAngle()const{
             return rollAngle;
         };
-
-        double getRollAngleDeg() const{
-            return (rollAngle * (180/PI));
-        }
 
         void changeWidth();
         double getWidthChanged()const{

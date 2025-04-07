@@ -7068,7 +7068,6 @@ MSVehicle::unsafeLinkAhead(const MSLane* lane) const {
     return false;
 }
 
-
 PositionVector
 MSVehicle::getBoundingBox(double offset) const {
     PositionVector centerLine;
@@ -7101,29 +7100,66 @@ MSVehicle::getBoundingBox(double offset) const {
         centerLine.extrapolate2D(offset);
     }
     PositionVector result = centerLine;
-
-    double roll = getRollAngle();
+ 
+    double roll = getRollAngle() * (PI/180);
     double height = myType->getHeight();
     double width = myType->getWidth();
-
+ 
     if((myType->getVehicleClass() == 1<<14) && (roll!=0)){
         if(roll < 0){
             result.move2side(-(height * sin(roll) + width * cos(roll)) + offset ); //to the left
             double updatedwidth = - height * sin(roll) + width * cos(roll);
-            printf("TIME %f THE WIDTH %f",SIMTIME, updatedwidth);
+            printf("TIME %f THE WIDTH %f \n",SIMTIME, updatedwidth);
             //centerLine.move2side(MIN2(0.0, -0.5 * myType->getWidth()) - offset); // to the right
             result.append(centerLine.reverse(), POSITION_EPS);
 
+           // for(PositionVector::const_iterator i = result.begin(); i!=result.end();++i){
+
+                //Position temp = *i;
+                //double 
+            //}
+
+            Position topLeft = result.front();
+            Position topRight = result.back();
+
+            double leftX = topLeft.x();
+            double rightX = topRight.x();
+            double leftY = topLeft.y();
+            double rightY = topRight.y();
+
+            double xdiff = leftX - rightX;
+            double ydiff = leftY - rightY;
+            double distance = sqrt(xdiff+ydiff);
+
+            //printf("TIME %f THE DISTANCE CALCULATED %f \n", SIMTIME, distance);
+            //setDistance(SIMTIME,distance);
+
+
+ 
         }
         else if(roll > 0){
             //result.move2side(MAX2(0.0, 0.5 * myType->getWidth() + offset)); //to the left
             centerLine.move2side((height * sin(roll) + width * cos(roll)) - offset); // to the right
             result.append(centerLine.reverse(), POSITION_EPS);
             double updatedwidth = height * sin(roll) + width * cos(roll);
-            printf("TIME %f THE WIDTH %f", SIMTIME, updatedwidth);
-    
-        }
+            printf("TIME %f THE WIDTH %f \n", SIMTIME, updatedwidth);
 
+            Position topLeft = result.front();
+            Position topRight = result.back();
+
+            double leftX = topLeft.x();
+            double rightX = topRight.x();
+            double leftY = topLeft.y();
+            double rightY = topRight.y();
+
+            double xdiff = leftX - rightX;
+            double ydiff = leftY - rightY;
+            double distance = sqrt(xdiff+ydiff);
+
+           // printf("TIME %f THE DISTANCE CALCULATED %f \n", SIMTIME, distance);
+            //setDistance(SIMTIME,distance);
+        }
+ 
     }
     
     else{result.move2side(MAX2(0.0, 0.5 * myType->getWidth() + offset)); //to the left
@@ -7131,6 +7167,7 @@ MSVehicle::getBoundingBox(double offset) const {
     result.append(centerLine.reverse(), POSITION_EPS);}
     return result;
 }
+ 
 
 
 PositionVector
@@ -8270,8 +8307,8 @@ void MSVehicle::calculateRollAngle(const MSVehicle* veh){
 
     double velocity = veh->getSpeed();
     double rollRad = atan((getYawRate() * velocity) / GRAVITY);
-    //setRollAngle(rollRad * (180/PI));
-    setRollAngle(rollRad);
+    setRollAngle(rollRad * (180/PI));
+    setRollAngles(SIMTIME,rollRad * (180/PI));    
     
 
 }
