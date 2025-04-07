@@ -352,7 +352,6 @@ MSVehicleControl::deleteVehicle(SUMOVehicle* veh, bool discard, bool wasKept) {
         auto temp = msVeh->getOldBoundingBoxValues();
         exportOldBoundingBox(temp,msVeh);
     }
-    //if(msVeh->getID() == "veh_id"){};
     auto temp = msVeh->getBoundingBoxValues();
     exportBoundingBox(temp,msVeh);
     if (!wasKept) {

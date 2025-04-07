@@ -1289,6 +1289,9 @@ public:
             return oldBoundingBoxValues;
         };
 
+        PositionVector calculateMotorcycleBoundingBox() ;
+        PositionVector pointRotation (PositionVector p);
+
     /** @enum ManoeuvreType
      *  @brief  flag identifying which, if any, manoeuvre is in progress
      */

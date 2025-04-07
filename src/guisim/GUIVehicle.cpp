@@ -236,13 +236,7 @@ GUIParameterTableWindow*
 GUIVehicle::getTypeParameterWindow(GUIMainWindow& app, GUISUMOAbstractView&) {
     GUIParameterTableWindow* ret = new GUIParameterTableWindow(app, *this, "vType:" + myType->getID());
     ret->mkItem(TL("length [m]"), false, myType->getLength());
-    if(this->getVehicleType().getVehicleClass() == 1<<14){
-        ret->mkItem(TL("width [m]"), true,
-                new FunctionBinding<GUIVehicle, double>(this, &MSVehicle::getWidthChanged));
-    }
-    else{
-        ret->mkItem(TL("width [m]"), false, myType->getWidth());
-    }
+    ret->mkItem(TL("width [m]"), false, myType->getWidth());
     ret->mkItem(TL("height [m]"), false, myType->getHeight());
     ret->mkItem(TL("minGap [m]"), false, myType->getMinGap());
     ret->mkItem(TL("vehicle class"), false, SumoVehicleClassStrings.getString(myType->getVehicleClass()));

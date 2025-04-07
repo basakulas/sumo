@@ -4779,11 +4779,12 @@ MSVehicle::executeMove() {
     if(myType->getVehicleClass()==1<<14){
       calculateRollAngle(this);
       std::pair<float,PositionVector> values = {SIMTIME,getBoundingBox()};
-        oldBoundingBoxValues.push_back(values);
-     changeWidth();
+      oldBoundingBoxValues.push_back(values);
+        std::pair<float,PositionVector> modifiedvalues = {SIMTIME,calculateMotorcycleBoundingBox()};
+        boundingBoxValues.push_back(modifiedvalues);
     }
-    std::pair<float,PositionVector> values = {SIMTIME,getBoundingBox()};
-    boundingBoxValues.push_back(values);
+    else{std::pair<float,PositionVector> values = {SIMTIME,getBoundingBox()};
+    boundingBoxValues.push_back(values);}
     return myLane != oldLane;
 }
 
@@ -8240,17 +8241,125 @@ void MSVehicle::calculateRollAngle(const MSVehicle* veh){
 
     double velocity = veh->getSpeed();
     double rollRad = atan((getYawRate() * velocity) / GRAVITY);
-    setRollAngle(rollRad * (180/PI));
+    //setRollAngle(rollRad * (180/PI));
+    setRollAngle(rollRad);
     
 
 }
 
-void MSVehicle::changeWidth(){
+/*void MSVehicle::changeWidth(){
     double width = getVehicleType().getWidth();
     double height = getVehicleType().getHeight();
     MSVehicleType& t = getSingularType();
-    double w = (width * cos(getRollAngle())) + (height * sin(getRollAngle()));
+    double w = abs((width * cos(getRollAngle() * PI/180)) + (height * sin(getRollAngle() * PI/180)));
     t.setWidth(w);
+}*/
+
+PositionVector MSVehicle::calculateMotorcycleBoundingBox() {
+
+    double height = myType->getHeight();
+    double length = getLength();
+    double width = getWidth();
+    double a = getAngle() + M_PI;
+    
+    Position front = getPosition();
+    Position front3D = Position(front.x(),front.y(),0.00000001);
+    Position back = front + Position(length * cos(a),length*sin(a));
+    Position back3D = Position(back.x(),back.y(),0.00000001);
+    PositionVector center;
+    center.push_back(front3D);
+    center.push_back(back3D);
+    PositionVector bottom = center;
+    
+    bottom.move2side(0.5*width);
+    center.move2side(-0.5*width);
+    bottom.append(center.reverse(),POSITION_EPS);
+
+    PositionVector top = bottom;
+    top.add(0,0,height);
+
+    printf("SIMTIME: %f \n",SIMTIME);
+    std::cout << "TOP BOUNDINGBOX: "<<top<<"\n";;
+    std::cout << "BOTTOM BOUNDINGBOX: "<<bottom<<"\n";;
+
+
+
+    PositionVector topRotated = pointRotation(top);
+    PositionVector bottomRotated = pointRotation(bottom);
+
+    PositionVector modified2Dbottom;
+    PositionVector modified2Dtop;
+    
+    for(PositionVector::const_iterator i = topRotated.begin(); i!=topRotated.end();++i){
+        Position old = *i;
+        Position t = Position(old.x(),old.y());
+        modified2Dtop.push_back(t);
+    }
+
+    for(PositionVector::const_iterator i = bottomRotated.begin(); i!=bottomRotated.end();++i){
+        Position old = *i;
+        Position t = Position(old.x(),old.y());
+        modified2Dbottom.push_back(t);
+    }
+
+    modified2Dtop.append(modified2Dbottom);
+    
+
+    double minX = std::numeric_limits<double>::max();
+    double minY = std::numeric_limits<double>::max();
+    double maxX = std::numeric_limits<double>::min();
+    double maxY = std::numeric_limits<double>::min();
+    
+    for(PositionVector::const_iterator i = modified2Dtop.begin(); i!=modified2Dtop.end();++i){
+       Position t = *i;
+       minX = std::min(minX,t.x());
+       maxX = std::max(maxX,t.x());
+       minY = std::min(minY,t.y());
+       maxY = std::max(maxY,t.y());
+    }
+    Position topLeft;
+    Position topRight;
+    Position bottomLeft;
+    Position bottomRight;
+    PositionVector left;
+    PositionVector right;
+    PositionVector fin;
+
+    for(PositionVector::const_iterator i = modified2Dtop.begin(); i!=modified2Dtop.end();++i){
+        Position t = *i;
+        if(t.x() == minX && t.y() == maxY) topLeft = t;
+        else if(t.x() == maxX && t.y() == maxY) topRight = t;
+        else if(t.x() == minX && t.y() == minY) bottomLeft = t;
+        else if(t.x() == maxX && t.y() == minY) bottomRight = t;
+    }
+
+    left.push_back(topLeft);
+    left.push_back(bottomLeft);
+    right.push_back(bottomRight);
+    right.push_back(topRight);
+
+    fin.append(left);
+    fin.append(right);
+    return fin;
+}
+
+PositionVector MSVehicle::pointRotation(PositionVector p){
+
+    float cosA = cos(getRollAngle());
+    float sinA = sin(getRollAngle());
+    PositionVector res;
+    
+
+    for(PositionVector::const_iterator i = p.begin(); i!=p.end();++i){
+            Position old = *i;
+            double x = old.x();
+            double y = old.y() * cosA - old.y() * sinA;
+            double z = old.z() * sinA + old.z() * cosA;
+            Position updated = Position(x,y,z);
+            res.push_back(updated);
+    }
+
+    return res;
 }
 
 
