@@ -1277,6 +1277,10 @@ public:
             return distances;
         }*/
 
+       std::vector<std::pair<double,double>> rawHeading;
+       std::vector<std::pair<double,double>> smoothHeading;
+       std::vector<std::pair<double,Position>> frontMiddle;
+
         std::vector<std::pair<double,double>> rollangles;
 
         void setRollAngles(double t,double a){
@@ -1288,6 +1292,32 @@ public:
             return rollangles;
         }
 
+        void setRawHeading(double t,double a){
+            std::pair<double,double> temp = {t,a};
+            rawHeading.push_back(temp);
+        }
+
+        std::vector<std::pair<double,double>> getRawHeading() const {
+            return rawHeading;
+        }
+
+        void setSmoothHeading(double t,double a){
+            std::pair<double,double> temp = {t,a};
+            smoothHeading.push_back(temp);
+        }
+
+        std::vector<std::pair<double,double>> getSmoothHeading() const {
+            return smoothHeading;
+        }
+
+        void setFrontMiddle(double t,Position a){
+            std::pair<double,Position> temp = {t,a};
+            frontMiddle.push_back(temp);
+        }
+
+        std::vector<std::pair<double,Position>> getFrontMiddle() const {
+            return frontMiddle;
+        }
 
         
 

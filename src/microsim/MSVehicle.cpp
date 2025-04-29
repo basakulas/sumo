@@ -4775,7 +4775,25 @@ MSVehicle::executeMove() {
     }
     workOnMoveReminders(myState.myPos - myState.myLastCoveredDist, myState.myPos, myState.mySpeed);
     // Return whether the vehicle did move to another lane
-    initPastSpeed(this->computeAngle(),SIMTIME);
+
+    double headingAngle = this->computeAngle();
+    setRawHeading(SIMTIME,GeomHelper::naviDegree(headingAngle));
+    static double smoothedAngle = 0.0;
+    double smooth = 0.0;
+    const double alpha = 0.1;
+    static bool firstCall = true;
+
+    if (firstCall) {
+        smooth = headingAngle;
+        firstCall = false;
+    }
+    else
+    {
+    smooth = alpha * headingAngle + (1 - alpha) * smoothedAngle;
+    }
+    smoothedAngle = smooth;
+    initPastSpeed(smooth,SIMTIME);
+    setSmoothHeading(SIMTIME,GeomHelper::naviDegree(smooth));
 
     if(myType->getVehicleClass()==1<<14){
       calculateRollAngle(this);
@@ -4788,7 +4806,7 @@ MSVehicle::executeMove() {
         std::pair<float,PositionVector> values = {SIMTIME,getBoundingBox()};
         boundingBoxValues.push_back(values);
     }
-
+    setFrontMiddle(SIMTIME,getPosition());
     return myLane != oldLane;
 }
 
@@ -8267,6 +8285,49 @@ void MSVehicle::calculateYawRate(const MSVehicle* veh){
 
     setYawRate(yawRate);
 
+   /*const double alpha = 0.1;
+    static double previousYawRate = 0;
+    static bool firstCall = true;
+    
+    if (firstCall && getYawRate() != 0) {
+        previousYawRate = getYawRate();
+        firstCall = false;
+    }
+ 
+    
+    double oldHeading = veh->computeAngle(); //get angle and compute angle give the same value
+    double yawRate = 0;
+    SUMOTime lastUpdate = SIMSTEP - DELTA_T;
+ 
+    if(lastUpdate > 0){
+ 
+        double currHeading = veh->computeAngle(); //angle already in radians, this calculates past angle
+        std::cout <<SIMTIME<< "  Old Heading: " << oldHeading << ", Current Heading: " << currHeading << std::endl;
+        auto current = pastSpeeds[0];
+        auto old = pastSpeeds[1];
+        oldHeading = old.first;
+        currHeading = current.first;
+        std::cout <<SIMTIME<< "  Old Heading: " << oldHeading << ", Current Heading: " << currHeading << std::endl;
+        double diffHeading = oldHeading - currHeading;
+        if(diffHeading > PI){
+            diffHeading -= 2 * PI;
+        }else if(diffHeading < -PI){
+            diffHeading += 2 * PI;
+        }
+        yawRate = diffHeading / (DELTA_T/1000.);
+        std::cout <<SIMTIME << "   diffHeading: " << diffHeading <<std::endl;
+ 
+        // Exponential smoothing
+        yawRate = alpha * yawRate + (1 - alpha) * previousYawRate;
+        previousYawRate = yawRate;
+ 
+    } else {
+        yawRate = 0;
+    }
+    
+    setYawRate(yawRate);*/
+    
+
 }
 
 void MSVehicle::calculateRollAngle(const MSVehicle* veh){
@@ -8277,6 +8338,30 @@ void MSVehicle::calculateRollAngle(const MSVehicle* veh){
     double rollRad = atan((getYawRate() * velocity) / GRAVITY);
     setRollAngle(rollRad * (180/PI));
     setRollAngles(SIMTIME,rollRad * (180/PI));    
+    /*calculateYawRate(veh);
+ 
+    double velocity = veh->getSpeed();
+    double rollRad = atan((getYawRate() * velocity) / GRAVITY);
+    
+    //exponential smoothing
+    static bool firstCall = true;
+    static double previousRollAngle = 0.0;
+    double smoothedRoll = 0.0;
+ 
+    if (firstCall && getRollAngle() != 0) {
+        smoothedRoll = rollRad;
+        firstCall = false;
+    }
+    else
+    {
+    double alphaRoll = 0.1; 
+    smoothedRoll = alphaRoll * rollRad + (1 - alphaRoll) * previousRollAngle;
+    }
+ 
+    previousRollAngle = smoothedRoll;
+ 
+    setRollAngle(smoothedRoll * (180/PI));
+    setRollAngles(SIMTIME,smoothedRoll * (180/PI));  */
     
 
 }

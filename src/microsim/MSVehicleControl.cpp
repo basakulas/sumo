@@ -430,6 +430,40 @@ MSVehicleControl::exportBoundingBox(std::vector<std::pair<float,PositionVector>>
             exfile << entry.first << "," << distance <<","<<area <<"\n";
     }
     exfile.close();
+if(v->getVehicleType().getVehicleClass() == 1<<14){
+    const std::vector<std::pair<double,double>> rawHeading = v->getRawHeading();
+    const std::vector<std::pair<double,double>> smoothHeading = v->getSmoothHeading();
+    path = "/home/ulas/Desktop/headings" + v->getID() + ".csv";
+    std::ofstream exxxfile(path);
+    if(!exxxfile.is_open()){
+        std::cerr << "Could not open file" << path << std::endl;
+    }
+    exxxfile << "TIME,RAW_HEADING,SMOOTH_HEADING" << "\n";
+    int i = 0;
+    for(const auto& entry: rawHeading ){
+        exxxfile << entry.first << "," << entry.second << "," << smoothHeading[i].second << "\n" ;
+        i++;
+    }
+    exxxfile.close();
+
+    const std::vector<std::pair<double,Position>> frontMiddle = v->getFrontMiddle();
+    path = "/home/ulas/Desktop/position" + v->getID() + ".csv";
+    std::ofstream exxxxxfile(path);
+    if(!exxxxxfile.is_open()){
+        std::cerr << "Could not open file" << path << std::endl;
+    }
+    exxxxxfile << "TIME,X,Y" << "\n";
+
+    for(const auto& entry: frontMiddle ){
+        exxxxxfile << entry.first << "," << entry.second << "\n" ;
+    }
+    exxxxxfile.close();
+
+}
+    
+
+
+   
    
 }
 
