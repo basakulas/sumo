@@ -4780,7 +4780,7 @@ MSVehicle::executeMove() {
     setRawHeading(SIMTIME,GeomHelper::naviDegree(headingAngle));
     static double smoothedAngle = 0.0;
     double smooth = 0.0;
-    const double alpha = 0.1;
+    const double alpha = 0.001;
     static bool firstCall = true;
 
     if (firstCall) {
@@ -4792,7 +4792,7 @@ MSVehicle::executeMove() {
     smooth = alpha * headingAngle + (1 - alpha) * smoothedAngle;
     }
     smoothedAngle = smooth;
-    initPastSpeed(smooth,SIMTIME);
+    initPastAngles(smooth,SIMTIME);
     setSmoothHeading(SIMTIME,GeomHelper::naviDegree(smooth));
 
     if(myType->getVehicleClass()==1<<14){
@@ -8265,15 +8265,15 @@ void MSVehicle::calculateYawRate(const MSVehicle* veh){
     if(lastUpdate > 0){
 
         double currHeading = veh->computeAngle(); //angle already in radians, this calculates past angle
-        auto current = pastSpeeds[0];
-        auto old = pastSpeeds[1];
+        auto current = pastAngles[0];
+        auto old = pastAngles[1];
         oldHeading = old.first;
         currHeading = current.first;
         double diffHeading = oldHeading - currHeading;
         if(diffHeading > PI){
-            diffHeading -= 20 * PI;
+            diffHeading -= 2 * PI;
         }else if(diffHeading < -PI){
-            diffHeading += 20 * PI;
+            diffHeading += 2 * PI;
         }
        
         

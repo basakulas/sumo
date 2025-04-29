@@ -1244,18 +1244,18 @@ public:
 
     public:
 
-        std::pair<double,double> pastSpeeds[2] = {{0,0},{0,0}};
+        std::pair<double,double> pastAngles[2] = {{0,0},{0,0}};
         std::vector<std::pair<float,PositionVector>> boundingBoxValues;
         std::vector<std::pair<float,PositionVector>> oldBoundingBoxValues;
 
         double yawRate;
         double rollAngle;
         
-        void initPastSpeed(const double speed,double t){
+        void initPastAngles(const double speed,double t){
             std::pair<double,double> temp = {speed,t};
-            auto first = pastSpeeds[0];
-            pastSpeeds[0] = temp;
-            pastSpeeds[1] = first;
+            auto first = pastAngles[0];
+            pastAngles[0] = temp;
+            pastAngles[1] = first;
             
         };
 
