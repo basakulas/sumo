@@ -1246,42 +1246,41 @@ public:
 
         std::pair<double,double> pastAngles[2] = {{0,0},{0,0}};
         std::vector<std::pair<float,PositionVector>> boundingBoxValues;
-        std::vector<std::pair<float,PositionVector>> oldBoundingBoxValues;
+        std::vector<std::pair<double,double>> rollangles;
+        std::vector<std::pair<double,double>> rawHeading;
+        std::vector<std::pair<double,double>> smoothHeading;
+        std::vector<std::pair<double,Position>> frontMiddle;
+        std::vector<std::pair<double,Position>> smoothPosition;
+        std::vector<Position> vehiclePos;
 
         double yawRate;
         double rollAngle;
         
-        void initPastAngles(const double speed,double t){
-            std::pair<double,double> temp = {speed,t};
+        void initPastAngles(const double angle,double t){
+            std::pair<double,double> temp = {angle,t};
             auto first = pastAngles[0];
             pastAngles[0] = temp;
             pastAngles[1] = first;
             
         };
 
-        void calculateYawRate (const MSVehicle* veh);
+        void calculateYawRate ();
         void calculateRollAngle (const MSVehicle* veh);
 
         void setYawRate (double yaw){
             yawRate = yaw;
         };
+        void setRollAngle(double roll){
+            rollAngle = roll;
+        };
 
-        //std::vector<std::pair<double,double>> distances;
+        double getYawRate(){
+            return yawRate;
+        };
 
-        /*void setDistance(double t,double d){
-            std::pair<double,double> temp = {t,d};
-            distances.push_back(temp);
-        }
-
-        std::vector<std::pair<double,double>> getDistances(){
-            return distances;
-        }*/
-
-       std::vector<std::pair<double,double>> rawHeading;
-       std::vector<std::pair<double,double>> smoothHeading;
-       std::vector<std::pair<double,Position>> frontMiddle;
-
-        std::vector<std::pair<double,double>> rollangles;
+        double getRollAngle()const{
+            return rollAngle;
+        };
 
         void setRollAngles(double t,double a){
             std::pair<double,double> temp = {t,a};
@@ -1318,34 +1317,39 @@ public:
         std::vector<std::pair<double,Position>> getFrontMiddle() const {
             return frontMiddle;
         }
+        std::vector<std::pair<double,Position>> getSmoothedPositions() const {
+            return smoothPosition;
+        }
+        void setSmoothPosition(double t,Position a){
+            std::pair<double,Position> temp = {t,a};
+            smoothPosition.push_back(temp);
+        }
+        std::vector<Position> getVehiclePos() const{
+            return vehiclePos;
+        }
+        double calculateHeading(double delta_y,double delta_x){
+            return (atan2(delta_y,delta_x));
+        }
+
+        Position smoothedPosition(Position pos,size_t w);
+        std::vector<Position> last_n(const std::vector<Position>& vec, size_t n){
+            if(n>=vec.size()){
+                return vec;
+            }
+            return std::vector<Position>(vec.end() - n, vec.end());
+            
+        }   
 
         
-
-        void setRollAngle(double roll){
-            rollAngle = roll;
-        };
-
-        double getYawRate(){
-            return yawRate;
-        };
-
-        double getRollAngle()const{
-            return rollAngle;
-        };
-
-        void changeWidth();
-        double getWidthChanged()const{
-            return myType->getWidth();
-        };
+      
         std::vector<std::pair<float,PositionVector>> getBoundingBoxValues() const {
             return boundingBoxValues;
-        };
-        std::vector<std::pair<float,PositionVector>> getOldBoundingBoxValues() const {
-            return oldBoundingBoxValues;
         };
 
         PositionVector calculateMotorcycleBoundingBox() ;
         PositionVector pointRotation (PositionVector p);
+
+
 
     /** @enum ManoeuvreType
      *  @brief  flag identifying which, if any, manoeuvre is in progress

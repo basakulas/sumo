@@ -4776,38 +4776,55 @@ MSVehicle::executeMove() {
     workOnMoveReminders(myState.myPos - myState.myLastCoveredDist, myState.myPos, myState.mySpeed);
     // Return whether the vehicle did move to another lane
 
-    double headingAngle = this->computeAngle();
-    setRawHeading(SIMTIME,GeomHelper::naviDegree(headingAngle));
-    static double smoothedAngle = 0.0;
-    double smooth = 0.0;
-    const double alpha = 0.001;
-    static bool firstCall = true;
-
-    if (firstCall) {
-        smooth = headingAngle;
-        firstCall = false;
-    }
-    else
-    {
-    smooth = alpha * headingAngle + (1 - alpha) * smoothedAngle;
-    }
-    smoothedAngle = smooth;
-    initPastAngles(smooth,SIMTIME);
-    setSmoothHeading(SIMTIME,GeomHelper::naviDegree(smooth));
-
     if(myType->getVehicleClass()==1<<14){
-      calculateRollAngle(this);
-      std::pair<float,PositionVector> values = {SIMTIME,getBoundingBox()};
-      boundingBoxValues.push_back(values);
-        //std::pair<float,PositionVector> modifiedvalues = {SIMTIME,calculateMotorcycleBoundingBox()};
-        //boundingBoxValues.push_back(modifiedvalues);
-    }
-    else{
+
+        Position currPos = this->getPosition();
+
+        setFrontMiddle(SIMTIME,getPosition());
+        vehiclePos.push_back(currPos);
+        Position smoothedPos = smoothedPosition(currPos,20);
+        setSmoothPosition(SIMTIME,smoothedPos);
+        double delta_y;
+        double delta_x;
+        if(smoothPosition.size()>1){
+            Position previous = smoothPosition[smoothPosition.size()-2].second;
+            delta_x = smoothedPos.x() - previous.x();
+            delta_y = smoothedPos.y() - previous.y();
+            double heading = calculateHeading(delta_y,delta_x);
+            setSmoothHeading(SIMTIME, heading);
+            initPastAngles(heading,SIMTIME);
+        }else{
+            initPastAngles(0,SIMTIME);
+            setSmoothHeading(SIMTIME,0);
+        }
+        calculateRollAngle(this);
+        
         std::pair<float,PositionVector> values = {SIMTIME,getBoundingBox()};
         boundingBoxValues.push_back(values);
     }
-    setFrontMiddle(SIMTIME,getPosition());
+    
     return myLane != oldLane;
+}
+Position
+MSVehicle::smoothedPosition(Position p, size_t w){
+    std::vector<Position> rawPositions = last_n(getVehiclePos(),w);
+    double yAvg;
+    double xAvg;
+    double y = 0;
+    double x = 0;
+    if(rawPositions.size() < w){
+        return p;
+    }else{
+        for(size_t i = 0;i<rawPositions.size();i++){
+             y += rawPositions[i].y();
+             x += rawPositions[i].x();
+        }
+        yAvg = y/w;
+        xAvg = x/w;
+        return Position(xAvg,yAvg);
+
+    }
+
 }
 
 void
@@ -7124,28 +7141,19 @@ MSVehicle::getBoundingBox(double offset) const {
     double width = myType->getWidth();
  
     
-        if((myType->getVehicleClass() == 1<<14) && (roll!=0)){
-            double updatedwidth = abs(height * sin(roll)) + abs(width * cos(roll));
-            printf("TIME %f THE WIDTH %f \n",SIMTIME, updatedwidth);
-            if(roll > 0){ 
-               result.move2side(-updatedwidth);
-                centerLine.append(result.reverse(),POSITION_EPS);
-                return centerLine;
-                
-                
-                
-                
-            }
-            else if(roll < 0){ 
-                result.move2side(updatedwidth);
-                result.append(centerLine.reverse(), POSITION_EPS);
-                
-                
-            }
+    if((myType->getVehicleClass() == 1<<14) && (roll!=0)){
+        double updatedwidth = abs(height * sin(roll)) + abs(width * cos(roll));
+        printf("TIME %f THE WIDTH %f \n",SIMTIME, updatedwidth);
+        if(roll > 0){ 
+            result.move2side(-updatedwidth);
+            centerLine.append(result.reverse(),POSITION_EPS);
+            return centerLine;
         }
- 
-    
-
+        else if(roll < 0){ 
+            result.move2side(updatedwidth);
+            result.append(centerLine.reverse(), POSITION_EPS);
+        }
+    }
     else{
         result.move2side(MAX2(0.0, 0.5 * myType->getWidth() + offset)); //to the left
     centerLine.move2side(MIN2(0.0, -0.5 * myType->getWidth() - offset)); // to the right
@@ -8257,14 +8265,13 @@ MSVehicle::getWaitingTimeFor(const MSLink* link) const {
     return link == myHaveStoppedFor ? SUMOTime_MAX : getWaitingTime();
 }
 
-void MSVehicle::calculateYawRate(const MSVehicle* veh){
+void MSVehicle::calculateYawRate(){
 
-    double oldHeading = veh->computeAngle(); //get angle and compute angle give the same value
+    double oldHeading; 
+    double currHeading;
     double yawRate = 0;
     SUMOTime lastUpdate = SIMSTEP - DELTA_T;
     if(lastUpdate > 0){
-
-        double currHeading = veh->computeAngle(); //angle already in radians, this calculates past angle
         auto current = pastAngles[0];
         auto old = pastAngles[1];
         oldHeading = old.first;
@@ -8285,94 +8292,17 @@ void MSVehicle::calculateYawRate(const MSVehicle* veh){
 
     setYawRate(yawRate);
 
-   /*const double alpha = 0.1;
-    static double previousYawRate = 0;
-    static bool firstCall = true;
-    
-    if (firstCall && getYawRate() != 0) {
-        previousYawRate = getYawRate();
-        firstCall = false;
-    }
- 
-    
-    double oldHeading = veh->computeAngle(); //get angle and compute angle give the same value
-    double yawRate = 0;
-    SUMOTime lastUpdate = SIMSTEP - DELTA_T;
- 
-    if(lastUpdate > 0){
- 
-        double currHeading = veh->computeAngle(); //angle already in radians, this calculates past angle
-        std::cout <<SIMTIME<< "  Old Heading: " << oldHeading << ", Current Heading: " << currHeading << std::endl;
-        auto current = pastSpeeds[0];
-        auto old = pastSpeeds[1];
-        oldHeading = old.first;
-        currHeading = current.first;
-        std::cout <<SIMTIME<< "  Old Heading: " << oldHeading << ", Current Heading: " << currHeading << std::endl;
-        double diffHeading = oldHeading - currHeading;
-        if(diffHeading > PI){
-            diffHeading -= 2 * PI;
-        }else if(diffHeading < -PI){
-            diffHeading += 2 * PI;
-        }
-        yawRate = diffHeading / (DELTA_T/1000.);
-        std::cout <<SIMTIME << "   diffHeading: " << diffHeading <<std::endl;
- 
-        // Exponential smoothing
-        yawRate = alpha * yawRate + (1 - alpha) * previousYawRate;
-        previousYawRate = yawRate;
- 
-    } else {
-        yawRate = 0;
-    }
-    
-    setYawRate(yawRate);*/
-    
-
 }
 
 void MSVehicle::calculateRollAngle(const MSVehicle* veh){
 
-    calculateYawRate(veh);
+    calculateYawRate();
 
     double velocity = veh->getSpeed();
     double rollRad = atan((getYawRate() * velocity) / GRAVITY);
     setRollAngle(rollRad * (180/PI));
     setRollAngles(SIMTIME,rollRad * (180/PI));    
-    /*calculateYawRate(veh);
- 
-    double velocity = veh->getSpeed();
-    double rollRad = atan((getYawRate() * velocity) / GRAVITY);
-    
-    //exponential smoothing
-    static bool firstCall = true;
-    static double previousRollAngle = 0.0;
-    double smoothedRoll = 0.0;
- 
-    if (firstCall && getRollAngle() != 0) {
-        smoothedRoll = rollRad;
-        firstCall = false;
-    }
-    else
-    {
-    double alphaRoll = 0.1; 
-    smoothedRoll = alphaRoll * rollRad + (1 - alphaRoll) * previousRollAngle;
-    }
- 
-    previousRollAngle = smoothedRoll;
- 
-    setRollAngle(smoothedRoll * (180/PI));
-    setRollAngles(SIMTIME,smoothedRoll * (180/PI));  */
-    
-
 }
-
-/*void MSVehicle::changeWidth(){
-    double width = getVehicleType().getWidth();
-    double height = getVehicleType().getHeight();
-    MSVehicleType& t = getSingularType();
-    double w = abs((width * cos(getRollAngle() * PI/180)) + (height * sin(getRollAngle() * PI/180)));
-    t.setWidth(w);
-}*/
 
 PositionVector MSVehicle::calculateMotorcycleBoundingBox() {
 
