@@ -4791,7 +4791,8 @@ MSVehicle::executeMove() {
             delta_x = smoothedPos.x() - previous.x();
             delta_y = smoothedPos.y() - previous.y();
             double heading = calculateHeading(delta_y,delta_x);
-            setSmoothHeading(SIMTIME, heading);
+            setRawHeading(SIMTIME,GeomHelper::naviDegree(getAngle()));
+            setSmoothHeading(SIMTIME, GeomHelper::naviDegree(heading));
             initPastAngles(heading,SIMTIME);
         }else{
             initPastAngles(0,SIMTIME);
