@@ -41,6 +41,10 @@
 #include "MSGlobals.h"
 #include "MSBaseVehicle.h"
 #include "MSNet.h"
+#include <Eigen/Core>
+#include <Eigen/Dense>
+
+using namespace Eigen;
 
 #define INVALID_SPEED 299792458 + 1 // nothing can go faster than the speed of light! Refs. #2577
 
@@ -1245,16 +1249,20 @@ public:
     public:
 
         std::pair<double,double> pastAngles[2] = {{0,0},{0,0}};
+        std::pair<double,double> pastAnglesMovingAvg[2] = {{0,0},{0,0}};
         std::vector<std::pair<float,PositionVector>> boundingBoxValues;
         std::vector<std::pair<double,double>> rollangles;
+        std::vector<std::pair<double,double>> rollanglesMovingAvg;
         std::vector<std::pair<double,double>> rawHeading;
         std::vector<std::pair<double,double>> smoothHeading;
         std::vector<std::pair<double,Position>> frontMiddle;
         std::vector<std::pair<double,Position>> smoothPosition;
+        std::vector<std::pair<double,Position>> smoothPositionMovingAvg;
         std::vector<Position> vehiclePos;
 
         double yawRate;
         double rollAngle;
+        double movingAvgRoll;
         
         void initPastAngles(const double angle,double t){
             std::pair<double,double> temp = {angle,t};
@@ -1264,14 +1272,25 @@ public:
             
         };
 
-        void calculateYawRate ();
-        void calculateRollAngle (const MSVehicle* veh);
+        void initPastAnglesMovingAvg(const double angle,double t){
+            std::pair<double,double> temp = {angle,t};
+            auto first = pastAnglesMovingAvg[0];
+            pastAnglesMovingAvg[0] = temp;
+            pastAnglesMovingAvg[1] = first;
+            
+        };
+
+        void calculateYawRate (bool movingAvg);
+        void calculateRollAngle (const MSVehicle* veh, bool movingAvg);
 
         void setYawRate (double yaw){
             yawRate = yaw;
         };
         void setRollAngle(double roll){
             rollAngle = roll;
+        };
+        void setRollAngleMovingAvg(double roll){
+            movingAvgRoll = roll;
         };
 
         double getYawRate(){
@@ -1282,6 +1301,10 @@ public:
             return rollAngle;
         };
 
+        double getRollAngleMovingAvg()const{
+            return movingAvgRoll;
+        };
+
         void setRollAngles(double t,double a){
             std::pair<double,double> temp = {t,a};
             rollangles.push_back(temp);
@@ -1289,6 +1312,15 @@ public:
 
         std::vector<std::pair<double,double>> getRollAngles() const {
             return rollangles;
+        }
+
+        void setRollAnglesMovingAvg(double t,double a){
+            std::pair<double,double> temp = {t,a};
+            rollanglesMovingAvg.push_back(temp);
+        }
+
+        std::vector<std::pair<double,double>> getRollAnglesMovingAvg() const {
+            return rollanglesMovingAvg;
         }
 
         void setRawHeading(double t,double a){
@@ -1323,6 +1355,14 @@ public:
         void setSmoothPosition(double t,Position a){
             std::pair<double,Position> temp = {t,a};
             smoothPosition.push_back(temp);
+        }
+
+        std::vector<std::pair<double,Position>> getSmoothedPositionsMovingAvg() const {
+            return smoothPositionMovingAvg;
+        }
+        void setSmoothPositionMovingAvg(double t,Position a){
+            std::pair<double,Position> temp = {t,a};
+            smoothPositionMovingAvg.push_back(temp);
         }
         std::vector<Position> getVehiclePos() const{
             return vehiclePos;
@@ -2280,5 +2320,69 @@ private:
 
     /// @brief invalidated assignment operator
     MSVehicle& operator=(const MSVehicle&);
+
+    class KalmanFilter {
+
+        public:
+            KalmanFilter(double dt, double process_noise, double measurement_noise) {
+                this->dt = dt;
+
+                // State transition & measurement matrices
+                F = Matrix2d::Identity();
+                H = Matrix2d::Identity();
+
+                // Covariances
+                P = Matrix2d::Identity() * 1000.0;     // initial uncertainty
+                Q = Matrix2d::Identity() * process_noise;   // process noise
+                R = Matrix2d::Identity() * measurement_noise; // measurement noise
+                
+                // Initial state 
+
+                x = Vector2d::Zero();
+               
+            }
+            KalmanFilter(const KalmanFilter& other)
+                : dt(other.dt),
+                    x(other.x),
+                    F(other.F),
+                    H(other.H),
+                    P(other.P),
+                    Q(other.Q),
+                    R(other.R)
+                {}
+
+            /// Set the initial position
+            void init(double x0, double y0) {
+                x << x0, y0;
+            }
+
+            void predict() {
+                x = F * x;
+                P = F * P * F.transpose() + Q;
+            }
+
+            
+
+            /// Update step with measurement z = [x_meas, y_meas]
+            void update(const Vector2d& z) {
+                Vector2d y = z - H * x;                        // innovation
+                Matrix2d S = H * P * H.transpose() + R;        // innovation cov
+                Matrix2d K = P * H.transpose() * S.inverse();  // Kalman gain
+
+                x = x + K * y;                                 // state update
+                P = (Matrix2d::Identity() - K * H) * P;        // cov update
+            }
+
+            Vector2d state() const {
+                return x;
+            }
+
+        private:
+            double dt;
+            Vector2d x;    // [x; y]
+            Matrix2d F, H, P, Q, R;
+            
+
+    };
 
 };

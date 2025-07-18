@@ -371,7 +371,7 @@ void
 MSVehicleControl::exportBoundingBox(std::vector<std::pair<float,PositionVector>>& values, const MSVehicle* v){
 
 
-    std::string path = "/home/ulas/Desktop/boundingbox_" + v->getID() + ".csv";
+    std::string path = "/Users/basakulas/Desktop/exports/boundingbox_" + v->getID() + ".csv";
     std::ofstream file(path);
     if(!file.is_open()){
         std::cerr << "Could not open file" << path << std::endl;
@@ -385,7 +385,7 @@ MSVehicleControl::exportBoundingBox(std::vector<std::pair<float,PositionVector>>
     file.close();
 
 
-    path = "/home/ulas/Desktop/boundingboxdata" + v->getID() + ".csv";
+    path = "/Users/basakulas/Desktop/exports/boundingboxdata" + v->getID() + ".csv";
     file.open(path);
     if(!file.is_open()){
         std::cerr << "Could not open file" << path << std::endl;
@@ -413,13 +413,13 @@ MSVehicleControl::exportBoundingBox(std::vector<std::pair<float,PositionVector>>
 
         const std::vector<std::pair<double,double>> angles = v->getRollAngles();
 
-        path = "/home/ulas/Desktop/rollangle" + v->getID() + ".csv";
+        path = "/Users/basakulas/Desktop/exports/rollangle" + v->getID() + ".csv";
         file.open(path);
         if(!file.is_open()){
             std::cerr << "Could not open file" << path << std::endl;
         }
         file << std::fixed << std::setprecision(10);
-        file << "TIME,ROLL_ANGLE"<<"\n";
+        file << "TIME,ROLL_ANGLE_KALMAN"<<"\n";
 
         for(const auto& entry: angles){
             file << entry.first << "," << entry.second << "\n" ;
@@ -427,9 +427,25 @@ MSVehicleControl::exportBoundingBox(std::vector<std::pair<float,PositionVector>>
 
         file.close();
 
+       const std::vector<std::pair<double,double>> angleMoving = v->getRollAnglesMovingAvg();
+
+        path = "/Users/basakulas/Desktop/exports/rollangleMovingAvg" + v->getID() + ".csv";
+        file.open(path);
+        if(!file.is_open()){
+            std::cerr << "Could not open file" << path << std::endl;
+        }
+        file << std::fixed << std::setprecision(10);
+        file << "TIME,ROLL_ANGLE_MOVINGAVG"<<"\n";
+
+        for(const auto& entry: angleMoving){
+            file << entry.first << "," << entry.second << "\n" ;
+        }
+
+        file.close();
+
         const std::vector<std::pair<double,double>> rawHeading = v->getRawHeading();
         const std::vector<std::pair<double,double>> smoothHeading = v->getSmoothHeading();
-        path = "/home/ulas/Desktop/headings" + v->getID() + ".csv";
+        path = "/Users/basakulas/Desktop/exports/headings" + v->getID() + ".csv";
         file.open(path);
         if(!file.is_open()){
             std::cerr << "Could not open file" << path << std::endl;
@@ -443,18 +459,19 @@ MSVehicleControl::exportBoundingBox(std::vector<std::pair<float,PositionVector>>
         file.close();
 
         const std::vector<std::pair<double,Position>> frontMiddle = v->getFrontMiddle();
+        const std::vector<std::pair<double,Position>> smoothedMA = v->getSmoothedPositionsMovingAvg();
         const std::vector<std::pair<double,Position>> smoothed = v->getSmoothedPositions();
 
-        path = "/home/ulas/Desktop/position" + v->getID() + ".csv";
+        path = "/Users/basakulas/Desktop/exports/position" + v->getID() + ".csv";
         file.open(path);
         file << std::fixed << std::setprecision(10);
         if(!file.is_open()){
             std::cerr << "Could not open file" << path << std::endl;
         }
-        file << "TIME,X,Y,SMOOTH_X,SMOOTH_Y" << "\n";  
+        file << "TIME,X,Y,SMOOTH_X_KF,SMOOTH_Y_KF,SMOOTH_X_MA,SMOOTH_Y_MA" << "\n";  
         int m  = 0;
         for(const auto& entry: frontMiddle ){
-            file << entry.first << "," << entry.second << "," << smoothed[m].second << "\n" ;
+            file << entry.first << "," << entry.second << "," << smoothed[m].second << "," << smoothedMA[m].second << "\n" ;
             m++;
         }
         file.close();

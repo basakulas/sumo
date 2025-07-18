@@ -9,5 +9,8 @@
         <net-file value="AudiKreis.net.xml"/>
         <route-files value="paperSIM.rou.xml"/>
     </input>
+	<time>
+	<step-length value="0.1"/>
+	</time>
    
 </sumoConfiguration>

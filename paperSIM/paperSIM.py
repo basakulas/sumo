@@ -34,7 +34,7 @@ def setSpeed(veh_id):
    
 
 if __name__ == "__main__":
-    sumo_config_path = "/home/ulas/sumofork/sumo/paperSIM/paperSIM.sumocfg"  # Update with your actual file path
+    sumo_config_path = "/Users/basakulas/sumofork/sumo/paperSIM/paperSIM.sumocfg"  # Update with your actual file path
     start_sumo_gui(sumo_config_path)  # Start SUMO-GUI
     try:
         run_simulation()  # Run the simulation
