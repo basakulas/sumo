@@ -350,7 +350,7 @@ void
 MSVehicleControl::deleteVehicle(SUMOVehicle* veh, bool discard, bool wasKept) {
     const MSVehicle* msVeh = dynamic_cast<const MSVehicle*>(veh);
     auto temp = msVeh->getBoundingBoxValues();
-    exportBoundingBox(temp,msVeh);
+    exportData(temp,msVeh);
     if (!wasKept) {
         myEndedVehNo++;
         if (discard) {
@@ -368,7 +368,7 @@ MSVehicleControl::deleteVehicle(SUMOVehicle* veh, bool discard, bool wasKept) {
 }
 
 void
-MSVehicleControl::exportBoundingBox(std::vector<std::pair<float,PositionVector>>& values, const MSVehicle* v){
+MSVehicleControl::exportData(std::vector<std::pair<float,PositionVector>>& values, const MSVehicle* v){
 
 
     std::string path = "/Users/basakulas/Desktop/exports/boundingbox_" + v->getID() + ".csv";

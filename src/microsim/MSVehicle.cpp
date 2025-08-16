@@ -4831,9 +4831,9 @@ MSVehicle::executeMove() {
 
         }
         
-        calculateRollAngle(this,movingAvg);
-        std::pair<float,PositionVector> values = {SIMTIME,getBoundingBox()};
-        boundingBoxValues.push_back(values);
+        calculateRollAngle(movingAvg);
+        //std::pair<float,PositionVector> values = {SIMTIME,getBoundingBox()};
+        //boundingBoxValues.push_back(values);
 
     }
     movingAvg = true;
@@ -4860,11 +4860,11 @@ MSVehicle::executeMove() {
         }else{
             //setRawHeading(SIMTIME,getAngle());
             initPastAnglesMovingAvg(0,SIMTIME);
-            //setSmoothHeading(SIMTIME,0);
+           // setSmoothHeading(SIMTIME,0);
         }
-        calculateRollAngle(this,true);
-        //std::pair<float,PositionVector> values = {SIMTIME,getBoundingBox()};
-        //boundingBoxValues.push_back(values);
+        calculateRollAngle(movingAvg);
+        std::pair<float,PositionVector> values = {SIMTIME,getBoundingBox()};
+        boundingBoxValues.push_back(values);
 
     }
     return myLane != oldLane;
@@ -8393,18 +8393,18 @@ void MSVehicle::calculateYawRate(bool movingAvg){
     
 
 }
-void MSVehicle::calculateRollAngle(const MSVehicle* veh,bool movingAvg){
+void MSVehicle::calculateRollAngle(bool movingAvg){
 
     if(movingAvg){
         calculateYawRate(movingAvg);
 
-        double velocity = veh->getSpeed();
+        double velocity = this->getSpeed();
         double rollRad = atan((getYawRate() * velocity) / GRAVITY);
         setRollAngleMovingAvg(rollRad * (180/PI));
         setRollAnglesMovingAvg(SIMTIME,rollRad * (180/PI));
     }else{
         calculateYawRate(movingAvg);
-        double velocity = veh->getSpeed();
+        double velocity = this->getSpeed();
         double rollRad = atan((getYawRate() * velocity) / GRAVITY);
         setRollAngle(rollRad * (180/PI));
         setRollAngles(SIMTIME,rollRad * (180/PI));    

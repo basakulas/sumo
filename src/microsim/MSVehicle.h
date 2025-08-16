@@ -1248,8 +1248,14 @@ public:
 
     public:
 
+        //needed for implementation
         std::pair<double,double> pastAngles[2] = {{0,0},{0,0}};
         std::pair<double,double> pastAnglesMovingAvg[2] = {{0,0},{0,0}};
+        double yawRate;
+        double rollAngle;
+        double movingAvgRoll;
+
+        //helper variables for export
         std::vector<std::pair<float,PositionVector>> boundingBoxValues;
         std::vector<std::pair<double,double>> rollangles;
         std::vector<std::pair<double,double>> rollanglesMovingAvg;
@@ -1260,10 +1266,9 @@ public:
         std::vector<std::pair<double,Position>> smoothPositionMovingAvg;
         std::vector<Position> vehiclePos;
 
-        double yawRate;
-        double rollAngle;
-        double movingAvgRoll;
         
+        
+        //functions for implementation
         void initPastAngles(const double angle,double t){
             std::pair<double,double> temp = {angle,t};
             auto first = pastAngles[0];
@@ -1281,7 +1286,7 @@ public:
         };
 
         void calculateYawRate (bool movingAvg);
-        void calculateRollAngle (const MSVehicle* veh, bool movingAvg);
+        void calculateRollAngle (bool movingAvg);
 
         void setYawRate (double yaw){
             yawRate = yaw;
@@ -1305,6 +1310,21 @@ public:
             return movingAvgRoll;
         };
 
+        double calculateHeading(double delta_y,double delta_x){
+            return (atan2(delta_y,delta_x));
+        }
+
+        Position smoothedPosition(Position pos,size_t w);
+
+        std::vector<Position> last_n(const std::vector<Position>& vec, size_t n){
+            if(n>=vec.size()){
+                return vec;
+            }
+            return std::vector<Position>(vec.end() - n, vec.end());
+            
+        }   
+
+        //functions for export
         void setRollAngles(double t,double a){
             std::pair<double,double> temp = {t,a};
             rollangles.push_back(temp);
@@ -1367,27 +1387,11 @@ public:
         std::vector<Position> getVehiclePos() const{
             return vehiclePos;
         }
-        double calculateHeading(double delta_y,double delta_x){
-            return (atan2(delta_y,delta_x));
-        }
-
-        Position smoothedPosition(Position pos,size_t w);
-        std::vector<Position> last_n(const std::vector<Position>& vec, size_t n){
-            if(n>=vec.size()){
-                return vec;
-            }
-            return std::vector<Position>(vec.end() - n, vec.end());
-            
-        }   
-
-        
-      
         std::vector<std::pair<float,PositionVector>> getBoundingBoxValues() const {
             return boundingBoxValues;
         };
-
-        PositionVector calculateMotorcycleBoundingBox() ;
-        PositionVector pointRotation (PositionVector p);
+        PositionVector pointRotation (PositionVector p); //experiment 3D point rotation
+		PositionVector calculateMotorcycleBoundingBox(); //experiment 3D point rotation affected bounding box
 
 
 
